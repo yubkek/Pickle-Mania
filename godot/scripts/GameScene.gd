@@ -1,4 +1,5 @@
 extends Node2D
+class_name GameScene
 
 ## Core gameplay scene – top-down pickleball court, joystick movement, swipe to hit.
 ## All drawing is done via _draw() / queue_redraw() so the scene needs no external assets.
@@ -83,7 +84,7 @@ func _ready() -> void:
 	NET_Y = round(H * 0.44)
 
 	# Read scene data
-	var data := MainMenu.pop_scene_data()
+	var data := GameState.pop_scene_data()
 	opponent_data = data.get("opponent", GameData.CAMPAIGN_OPPONENTS[0])
 	mode          = data.get("mode", "campaign")
 	level_index   = data.get("level_index", 0)
@@ -194,7 +195,7 @@ func _apply_joystick(pos: Vector2) -> void:
 	var dx := pos.x - JS_BASE_X
 	var dy := pos.y - js_base_y
 	var dist := sqrt(dx * dx + dy * dy)
-	var clamped := min(dist, JS_RADIUS)
+	var clamped: float = min(dist, JS_RADIUS)
 	var angle := atan2(dy, dx)
 	js_dx = cos(angle) * clamped / JS_RADIUS
 	js_dy = sin(angle) * clamped / JS_RADIUS
@@ -224,7 +225,7 @@ func _execute_hit(sdx: float, sdy: float, duration: float) -> void:
 	nx /= renorm; ny /= renorm
 
 	var paddle: Dictionary = GameData.get_paddle(GameState.equipped_paddle)
-	var base_speed := 380.0 + player_stats.get("power", 12) * 14.0 * paddle.get("power", 1.0)
+	var base_speed: float = 380.0 + float(player_stats.get("power", 12)) * 14.0 * float(paddle.get("power", 1.0))
 
 	# Timing bonus
 	var bonus := 1.0
@@ -249,8 +250,8 @@ func _execute_hit(sdx: float, sdy: float, duration: float) -> void:
 		ball_spin = 0
 
 	# Accuracy deviation
-	var acc := player_stats.get("accuracy", 13) * paddle.get("accuracy", 1.0)
-	var deviation := max(0.0, (1.0 - acc / 45.0)) * 0.35
+	var acc: float = float(player_stats.get("accuracy", 13)) * float(paddle.get("accuracy", 1.0))
+	var deviation: float = max(0.0, (1.0 - acc / 45.0)) * 0.35
 	nx += (randf() - 0.5) * deviation
 	ny += (randf() - 0.5) * deviation * 0.4
 	var renorm2 := sqrt(nx * nx + ny * ny)
@@ -271,7 +272,7 @@ func _execute_hit(sdx: float, sdy: float, duration: float) -> void:
 # ── Movement ──────────────────────────────────────────────────────────────────
 
 func _move_player(dt: float) -> void:
-	var speed := 100.0 + player_stats.get("moveSpeed", 13) * 3.8
+	var speed: float = 100.0 + float(player_stats.get("moveSpeed", 13)) * 3.8
 	player_x += js_dx * speed * dt
 	player_y += js_dy * speed * dt
 	player_x  = clamp(player_x, MARGIN + 20, W - MARGIN - 20)
@@ -331,10 +332,10 @@ func _check_hit_zone() -> void:
 
 func _update_ai(dt: float) -> void:
 	var stats: Dictionary = opponent_data.get("stats", {})
-	var move_speed := stats.get("moveSpeed", 10)
-	var power      := stats.get("power", 10)
-	var accuracy   := stats.get("accuracy", 10)
-	var ai_speed   := 75.0 + move_speed * 3.2
+	var move_speed: int = stats.get("moveSpeed", 10)
+	var power: int      = stats.get("power", 10)
+	var accuracy: int   = stats.get("accuracy", 10)
+	var ai_speed: float = 75.0 + move_speed * 3.2
 
 	if abs(opp_x - ball_x) > 4:
 		var dir := 1.0 if opp_x < ball_x else -1.0
@@ -345,13 +346,13 @@ func _update_ai(dt: float) -> void:
 		var dx := ball_x - opp_x
 		var dy := ball_y - opp_y
 		var dist := sqrt(dx * dx + dy * dy)
-		var ai_zone := 55.0 + accuracy * 1.8
+		var ai_zone: float = 55.0 + accuracy * 1.8
 		if dist < ai_zone:
-			var ai_base := 340.0 + power * 13.0
-			var inaccuracy := max(0.0, 1.0 - accuracy / 40.0) * 120.0
-			var target_px := player_x + (randf() - 0.5) * inaccuracy
-			var target_py := H * 0.72
-			var tdx := target_px - ball_x
+			var ai_base: float = 340.0 + power * 13.0
+			var inaccuracy: float = max(0.0, 1.0 - accuracy / 40.0) * 120.0
+			var target_px: float = player_x + (randf() - 0.5) * inaccuracy
+			var target_py: float = H * 0.72
+			var tdx: float = target_px - ball_x
 			var tdy := target_py - ball_y
 			var tlen := sqrt(tdx * tdx + tdy * tdy)
 			ball_vx = (tdx / tlen) * ai_base
@@ -385,8 +386,8 @@ func _opponent_scored() -> void:
 		player_serving = false
 		get_tree().create_timer(1.1).timeout.connect(func(): _serve_ball())
 		return
-	var stats := opponent_data.get("stats", {})
-	var dmg := int(10 + stats.get("power", 10) * 2.2)
+	var stats: Dictionary = opponent_data.get("stats", {})
+	var dmg := int(10 + float(stats.get("power", 10)) * 2.2)
 	player_hp = max(0, player_hp - dmg)
 	_update_hp_bars()
 	_show_damage(player_x, player_y, dmg, true)
@@ -423,7 +424,7 @@ func _activate_power(power_id: String) -> void:
 			active_powers["faster_hit"] = true
 			_flash_feedback("Faster Hit READY!", Color(0.0, 0.667, 1.0), 1.0)
 		"dash":
-			var dir := sign(js_dx) if js_dx != 0 else (1.0 if randf() > 0.5 else -1.0)
+			var dir: float = sign(js_dx) if js_dx != 0 else (1.0 if randf() > 0.5 else -1.0)
 			player_x = clamp(player_x + dir * 90.0, MARGIN + 20, W - MARGIN - 20)
 			_flash_feedback("DASH!", Color(0.533, 1.0, 0.0), 1.0)
 		"slow_time":
@@ -482,7 +483,7 @@ func _end_match(player_won: bool) -> void:
 
 		var loot_btn := _make_result_button("OPEN LOOT", W / 2.0, H / 2.0 + 50,
 			Color.WHITE, Color(0.2, 0.333, 0), func():
-				MainMenu._store_scene_data({"orb_type": orb_type, "mode": mode, "level_index": level_index})
+				GameState.store_scene_data({"orb_type": orb_type, "mode": mode, "level_index": level_index})
 				get_tree().change_scene_to_file("res://scenes/LootScene.tscn")
 		)
 		add_child(loot_btn)
@@ -491,7 +492,7 @@ func _end_match(player_won: bool) -> void:
 
 		var retry_btn := _make_result_button("RETRY", W / 2.0, H / 2.0 + 50,
 			Color.WHITE, Color(0.333, 0, 0), func():
-				MainMenu._store_scene_data({"opponent": opponent_data, "mode": mode, "level_index": level_index})
+				GameState.store_scene_data({"opponent": opponent_data, "mode": mode, "level_index": level_index})
 				get_tree().change_scene_to_file("res://scenes/GameScene.tscn")
 		)
 		add_child(retry_btn)
@@ -581,7 +582,7 @@ func _create_power_buttons() -> void:
 		var power: Dictionary = GameData.get_superpower(power_id)
 		if power.is_empty():
 			continue
-		var bx := W - 35.0 - i * 55.0
+		var bx: float = W - 35.0 - i * 55.0
 		var by := js_base_y
 
 		var btn := Button.new()

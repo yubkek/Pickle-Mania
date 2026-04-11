@@ -167,14 +167,14 @@ func _make_button(text: String, cx: float, cy: float,
 	return btn
 
 func _go_to(scene_path: String, _meta: Dictionary = {}) -> void:
-	# Store meta in a scene-agnostic way via a global dict on the tree root
+	if not _meta.is_empty():
+		GameState.store_scene_data(_meta)
 	get_tree().change_scene_to_file(scene_path)
 
 func _start_ranked() -> void:
 	var opponents := GameData.CAMPAIGN_OPPONENTS
 	var opp: Dictionary = opponents[randi() % opponents.size()]
-	# Pass data through a temporary node on the root
-	_store_scene_data({"opponent": opp, "mode": "ranked", "level_index": 0})
+	GameState.store_scene_data({"opponent": opp, "mode": "ranked", "level_index": 0})
 	get_tree().change_scene_to_file("res://scenes/GameScene.tscn")
 
 func _flash_msg(msg: String) -> void:
@@ -186,28 +186,6 @@ func _flash_msg(msg: String) -> void:
 			_msg_label.queue_free()
 			_msg_label = null
 	)
-
-## Stashes data into a persistent node so the next scene can read it.
-static func _store_scene_data(data: Dictionary) -> void:
-	var root: Window = (Engine.get_main_loop() as SceneTree).root
-	var existing: Node = root.get_node_or_null("SceneData")
-	if existing != null:
-		existing.queue_free()
-	var node := Node.new()
-	node.name = "SceneData"
-	node.set_meta("data", data)
-	root.add_child(node)
-
-## Reads and clears the stashed scene data.
-static func pop_scene_data() -> Dictionary:
-	var root: Window = (Engine.get_main_loop() as SceneTree).root
-	var node: Node = root.get_node_or_null("SceneData")
-	if node == null:
-		return {}
-	var data: Dictionary = node.get_meta("data", {})
-	node.queue_free()
-	return data
-
 
 # ── Inner draw helper ──────────────────────────────────────────────────────────
 

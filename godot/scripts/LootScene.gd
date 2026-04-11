@@ -13,7 +13,7 @@ var _revealed: bool    = false
 func _ready() -> void:
 	_W = get_viewport_rect().size.x
 	_H = get_viewport_rect().size.y
-	var data := MainMenu.pop_scene_data()
+	var data := GameState.pop_scene_data()
 	_orb_type    = data.get("orb_type",    "bronze")
 	_mode        = data.get("mode",        "campaign")
 	_level_index = data.get("level_index", 0)

@@ -100,6 +100,27 @@ func xp_progress() -> float:
 		return 1.0
 	return float(xp - prev) / float(next - prev)
 
+# ── Scene data passing (between scenes) ───────────────────────────────────────
+
+func store_scene_data(data: Dictionary) -> void:
+	var root: Window = get_tree().root
+	var existing: Node = root.get_node_or_null("SceneData")
+	if existing != null:
+		existing.queue_free()
+	var node := Node.new()
+	node.name = "SceneData"
+	node.set_meta("data", data)
+	root.add_child(node)
+
+func pop_scene_data() -> Dictionary:
+	var root: Window = get_tree().root
+	var node: Node = root.get_node_or_null("SceneData")
+	if node == null:
+		return {}
+	var data: Dictionary = node.get_meta("data", {})
+	node.queue_free()
+	return data
+
 # ── Private helpers ────────────────────────────────────────────────────────────
 
 func _apply_defaults() -> void:

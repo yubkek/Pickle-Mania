@@ -67,7 +67,7 @@ func _build_ui() -> void:
 			btn.add_theme_stylebox_override("focus",   style)
 			var idx := i  # capture for closure
 			btn.pressed.connect(func():
-				MainMenu._store_scene_data({"opponent": GameData.CAMPAIGN_OPPONENTS[idx], "mode": "campaign", "level_index": idx})
+				GameState.store_scene_data({"opponent": GameData.CAMPAIGN_OPPONENTS[idx], "mode": "campaign", "level_index": idx})
 				get_tree().change_scene_to_file("res://scenes/GameScene.tscn")
 			)
 			add_child(btn)

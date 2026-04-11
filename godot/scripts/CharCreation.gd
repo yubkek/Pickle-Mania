@@ -14,7 +14,7 @@ var _next_scene: String = "campaign"  # or "ranked"
 func _ready() -> void:
 	_W = get_viewport_rect().size.x
 	_H = get_viewport_rect().size.y
-	var data := MainMenu.pop_scene_data()
+	var data := GameState.pop_scene_data()
 	_next_scene = data.get("next", "campaign")
 	_build_ui()
 
@@ -140,7 +140,7 @@ func _confirm() -> void:
 	if _next_scene == "ranked":
 		var opponents := GameData.CAMPAIGN_OPPONENTS
 		var opp: Dictionary = opponents[randi() % opponents.size()]
-		MainMenu._store_scene_data({"opponent": opp, "mode": "ranked", "level_index": 0})
+		GameState.store_scene_data({"opponent": opp, "mode": "ranked", "level_index": 0})
 		get_tree().change_scene_to_file("res://scenes/GameScene.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/Campaign.tscn")
