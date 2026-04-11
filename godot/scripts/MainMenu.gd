@@ -189,8 +189,8 @@ func _flash_msg(msg: String) -> void:
 
 ## Stashes data into a persistent node so the next scene can read it.
 static func _store_scene_data(data: Dictionary) -> void:
-	var root := Engine.get_main_loop().root
-	var existing := root.get_node_or_null("SceneData")
+	var root: Window = (Engine.get_main_loop() as SceneTree).root
+	var existing: Node = root.get_node_or_null("SceneData")
 	if existing != null:
 		existing.queue_free()
 	var node := Node.new()
@@ -200,8 +200,8 @@ static func _store_scene_data(data: Dictionary) -> void:
 
 ## Reads and clears the stashed scene data.
 static func pop_scene_data() -> Dictionary:
-	var root := Engine.get_main_loop().root
-	var node := root.get_node_or_null("SceneData")
+	var root: Window = (Engine.get_main_loop() as SceneTree).root
+	var node: Node = root.get_node_or_null("SceneData")
 	if node == null:
 		return {}
 	var data: Dictionary = node.get_meta("data", {})
